@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0D2240">
+<title>ECB Scout Intelligence Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   DESIGN TOKENS — Play-Cricket design system (extracted from Figma)
+═══════════════════════════════════════════════════════════════════════ */
+:root {
+  --blue:      #1565C0;
+  --blue-dark: #1251A3;
+  --blue-lt:   #EEF4FF;
+  --navy:      #0D2240;
+  --navy-lt:   #1A3358;
+  --green:     #5BAD37;
+  --green-dk:  #4A962C;
+  --green-lt:  #EDFBEE;
+  --red:       #D32F2F;
+  --amber:     #F59E0B;
+  --white:     #FFFFFF;
+  --grey-bg:   #F4F6F8;
+  --grey-bd:   #DCDDE1;
+  --grey-mid:  #9CA3AF;
+  --text:      #1A1A2E;
+  --muted:     #64748B;
+  --f:         'Montserrat', sans-serif;
+  --stripe-h:  4px;
+  --header-h:  52px;
+  --subnav-h:  38px;
+  --sidebar-w: 180px;
+  --mob-nav-h: 60px;
+  --radius:    3px;
+  --shadow:    0 1px 4px rgba(13,34,64,.10), 0 4px 16px rgba(13,34,64,.06);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; -webkit-text-size-adjust: 100%; }
+body {
+  height: 100%; font-family: var(--f); background: var(--grey-bg);
+  color: var(--text); -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent; overflow: hidden;
+}
+button, input, select, textarea {
+  font-family: var(--f); font-size: 16px;
+  -webkit-appearance: none; appearance: none;
+}
+input:focus, button:focus { outline: 2px solid var(--blue); outline-offset: 2px; }
+img { max-width: 100%; }
+* { -webkit-overflow-scrolling: touch; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════════════════════ */
+.hidden  { display: none !important; }
+.sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+
+/* Play-Cricket top stripe */
+.pc-stripe {
+  height: var(--stripe-h); flex-shrink: 0;
+  background: linear-gradient(90deg,
+    var(--blue)  0% 40%,
+    var(--green) 40% 60%,
+    var(--red)   60% 80%,
+    var(--amber) 80% 100%);
+}
+
+/* Section heading — UPPERCASE + green dot */
+.section-title {
+  font-size: 13px; font-weight: 900; color: var(--navy);
+  text-transform: uppercase; letter-spacing: .6px;
+  display: flex; align-items: center; gap: 2px; margin-bottom: 12px;
+}
+.section-title::after {
+  content: '•'; color: var(--green); font-size: 20px; line-height: 1;
+}
+
+/* Cards */
+.card {
+  background: var(--white); border: 1px solid var(--grey-bd);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.card-top-blue  { border-top: 3px solid var(--blue); }
+.card-top-green { border-top: 3px solid var(--green); }
+.card-top-navy  { border-top: 3px solid var(--navy); }
+
+/* Badges */
+.badge {
+  display: inline-flex; align-items: center;
+  font-size: 9px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .5px; padding: 3px 8px; border-radius: var(--radius);
+  white-space: nowrap;
+}
+.badge-blue   { background: var(--blue);    color: #fff; }
+.badge-green  { background: var(--green);   color: #fff; }
+.badge-navy   { background: var(--navy);    color: #fff; }
+.badge-grey   { background: var(--grey-bg); color: var(--navy); border: 1px solid var(--grey-bd); }
+.badge-red    { background: var(--red);     color: #fff; }
+.badge-amber  { background: var(--amber);   color: #fff; }
+.badge-live   { background: var(--red); color: #fff; animation: blink 1.4s infinite; }
+.badge-new    { background: var(--green); color: #fff; margin-left: 5px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  font-family: var(--f); font-size: 11px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .8px;
+  padding: 10px 16px; border: none; cursor: pointer;
+  border-radius: var(--radius); transition: background .15s, transform .1s;
+  white-space: nowrap; min-height: 44px;
+}
+.btn:active { transform: scale(.98); }
+.btn-blue    { background: var(--blue);  color: #fff; }
+.btn-blue:hover  { background: var(--blue-dark); }
+.btn-green   { background: var(--green); color: #fff; }
+.btn-green:hover { background: var(--green-dk); }
+.btn-navy    { background: var(--navy);  color: #fff; }
+.btn-outline {
+  background: transparent; color: var(--navy);
+  border: 2px solid var(--grey-bd); min-height: 44px;
+}
+.btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+.btn-sm { font-size: 10px; padding: 7px 12px; min-height: 36px; }
+.btn-full { width: 100%; }
+
+/* Form elements */
+.form-label {
+  display: block; font-size: 10px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .7px;
+  color: var(--navy); margin-bottom: 6px;
+}
+.form-input {
+  width: 100%; padding: 10px 12px; font-size: 16px; font-weight: 500;
+  border: 2px solid var(--grey-bd); border-radius: var(--radius);
+  background: var(--white); color: var(--text); transition: border-color .15s;
+}
+.form-input:focus { border-color: var(--blue); }
+.form-group { margin-bottom: 14px; }
+
+/* Chips */
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .3px;
+  padding: 6px 12px; border: 2px solid var(--grey-bd);
+  cursor: pointer; transition: all .15s; color: var(--muted);
+  border-radius: var(--radius); min-height: 36px;
+  display: inline-flex; align-items: center;
+}
+.chip.on-blue  { background: var(--blue);  color: #fff; border-color: var(--blue); }
+.chip.on-green { background: var(--green); color: #fff; border-color: var(--green); }
+.chip.on-navy  { background: var(--navy);  color: #fff; border-color: var(--navy); }
+
+/* Readiness bar */
+.bar-wrap { display: flex; align-items: center; gap: 6px; }
+.bar-track { height: 6px; background: var(--grey-bd); border-radius: 0; flex: 1; min-width: 40px; overflow: hidden; }
+.bar-fill  { height: 100%; border-radius: 0; transition: width .6s ease; }
+
+/* Archetype tags */
+.arch {
+  font-size: 9px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .3px; padding: 3px 7px; border-radius: var(--radius);
+}
+.arch-bat  { background: #EEF4FF; color: #1251A3; }
+.arch-bowl { background: #EDFBEE; color: #2E7D32; }
+.arch-all  { background: #F5F0FF; color: #5E35B1; }
+.arch-wk   { background: #FFF3E0; color: #E65100; }
+.arch-spin { background: #FBE9FF; color: #7B1FA2; }
+.arch-la   { background: #E0F7FA; color: #006064; }
+
+/* Potential */
+.pot {
+  font-size: 9px; font-weight: 800; text-transform: uppercase;
+  padding: 3px 7px; border-radius: var(--radius); letter-spacing: .3px;
+}
+.pot-a { background: var(--green); color: #fff; }
+.pot-b { background: var(--blue);  color: #fff; }
+.pot-c { background: var(--grey-bg); color: var(--muted); border: 1px solid var(--grey-bd); }
+
+/* Readiness buttons */
+.r-grid { display: flex; gap: 6px; }
+.r-btn {
+  flex: 1; padding: 10px 6px; border: 2px solid var(--grey-bd);
+  background: var(--white); cursor: pointer; text-align: center;
+  font-family: var(--f); font-size: 10px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .4px; color: var(--muted);
+  transition: all .15s; border-radius: var(--radius); min-height: 44px;
+}
+.r-btn.on-g { background: var(--green); color: #fff; border-color: var(--green); }
+.r-btn.on-b { background: var(--blue);  color: #fff; border-color: var(--blue); }
+.r-btn.on-n { background: var(--navy);  color: #fff; border-color: var(--navy); }
+
+/* Gauge */
+.gauge-row { display: flex; flex-direction: column; gap: 10px; }
+.gauge-line { display: flex; align-items: center; gap: 8px; }
+.gauge-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--navy); width: 72px; flex-shrink: 0; }
+.gauge-track { flex: 1; height: 8px; background: var(--grey-bd); border-radius: 0; overflow: hidden; }
+.gauge-fill { height: 100%; transition: width 1s ease; }
+.gauge-num { font-size: 11px; font-weight: 900; color: var(--navy); width: 28px; text-align: right; flex-shrink: 0; }
+
+/* Avatar initials */
+.avatar {
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; color: #fff; flex-shrink: 0;
+  border-radius: var(--radius);
+}
+
+/* Theme tags (AI) */
+.theme { font-size: 9px; font-weight: 800; text-transform: uppercase; padding: 3px 7px; border-radius: var(--radius); }
+.theme-pos  { background: #EDFBEE; color: #2E7D32; border: 1px solid #C8E6C9; }
+.theme-warn { background: #FFF8E1; color: #E65100; border: 1px solid #FFE082; }
+
+/* Animations */
+@keyframes blink   { 0%,100%{opacity:1} 50%{opacity:.55} }
+@keyframes spin    { to{transform:rotate(360deg)} }
+@keyframes fadeUp  { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes slideIn { from{transform:translateX(-100%)} to{transform:translateX(0)} }
+@keyframes pulse   { 0%,100%{box-shadow:0 0 0 0 rgba(91,173,55,.4)} 70%{box-shadow:0 0 0 6px rgba(91,173,55,0)} }
+
+.fu  { animation: fadeUp .3s ease both; }
+.fu1 { animation-delay: .05s; }
+.fu2 { animation-delay: .1s; }
+.fu3 { animation-delay: .15s; }
+.fu4 { animation-delay: .2s; }
+.fu5 { animation-delay: .25s; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-thumb { background: var(--grey-bd); border-radius: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   F01 — PASSWORD SCREEN
+═══════════════════════════════════════════════════════════════════════ */
+#auth-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--navy);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px;
+  /* diagonal stripe texture */
+  background-image:
+    repeating-linear-gradient(-45deg,
+      rgba(255,255,255,.015) 0, rgba(255,255,255,.015) 1px,
+      transparent 1px, transparent 14px);
+}
+.auth-card {
+  background: var(--white); border-radius: var(--radius);
+  padding: 36px 32px; width: 100%; max-width: 400px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.35);
+}
+.auth-logo {
+  display: flex; align-items: baseline; gap: 2px; margin-bottom: 6px;
+}
+.auth-logo-main { font-size: 18px; font-weight: 900; color: var(--navy); }
+.auth-logo-dot  { font-size: 24px; font-weight: 900; color: var(--green); line-height: 1; }
+.auth-logo-sub  { font-size: 13px; font-weight: 900; color: var(--green); margin-left: 8px; letter-spacing: .5px; }
+.auth-headline  { font-size: 22px; font-weight: 900; color: var(--navy); text-transform: uppercase; letter-spacing: .5px; margin-top: 16px; margin-bottom: 4px; }
+.auth-sub       { font-size: 12px; color: var(--muted); margin-bottom: 28px; font-weight: 500; }
+.auth-error     { font-size: 11px; font-weight: 700; color: var(--red); margin-top: 8px; display: none; }
+.auth-hint      { font-size: 11px; color: var(--muted); margin-top: 20px; text-align: center; }
+.auth-hint span { font-weight: 800; color: var(--navy); }
+.auth-stripe    { height: var(--stripe-h); border-radius: var(--radius) var(--radius) 0 0; margin: -36px -32px 28px; background: linear-gradient(90deg,var(--blue) 0% 40%,var(--green) 40% 60%,var(--red) 60% 80%,var(--amber) 80% 100%); }
+#auth-input { font-size: 16px; letter-spacing: .1em; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   F03 — ROLE SWITCHER MODAL
+═══════════════════════════════════════════════════════════════════════ */
+#role-modal {
+  position: fixed; inset: 0; z-index: 8000;
+  background: rgba(13,34,64,.75); display: none;
+  align-items: center; justify-content: center; padding: 24px;
+}
+#role-modal.open { display: flex; }
+.role-modal-card {
+  background: var(--white); border-radius: var(--radius);
+  padding: 28px; width: 100%; max-width: 440px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.3);
+}
+.role-modal-title {
+  font-size: 14px; font-weight: 900; text-transform: uppercase;
+  color: var(--navy); letter-spacing: .6px; margin-bottom: 6px;
+  display: flex; align-items: center;
+}
+.role-modal-title::after { content: '•'; color: var(--green); font-size: 20px; margin-left: 2px; }
+.role-modal-sub { font-size: 11px; color: var(--muted); margin-bottom: 20px; font-weight: 500; }
+.role-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.role-option {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; border: 2px solid var(--grey-bd);
+  border-radius: var(--radius); cursor: pointer; transition: all .15s;
+  min-height: 64px;
+}
+.role-option:hover    { border-color: var(--blue); background: var(--blue-lt); }
+.role-option.selected { border-color: var(--green); background: var(--green-lt); }
+.role-icon {
+  width: 40px; height: 40px; border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.role-info { flex: 1; }
+.role-name { font-size: 13px; font-weight: 800; text-transform: uppercase; color: var(--navy); letter-spacing: .4px; }
+.role-desc { font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 500; }
+.role-check {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid var(--grey-bd); display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+  font-size: 11px; font-weight: 900; color: transparent;
+}
+.role-option.selected .role-check {
+  background: var(--green); border-color: var(--green); color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   F02 — APP SHELL (responsive)
+═══════════════════════════════════════════════════════════════════════ */
+#app {
+  height: 100%; display: flex; flex-direction: column; overflow: hidden;
+}
+
+/* --- Desktop/Tablet header --- */
+.app-header {
+  background: var(--navy); height: var(--header-h);
+  display: flex; align-items: center; padding: 0 16px;
+  gap: 12px; flex-shrink: 0; z-index: 100;
+}
+.header-logo { display: flex; align-items: baseline; gap: 0; text-decoration: none; }
+.header-logo-main { font-size: 13px; font-weight: 900; color: #fff; letter-spacing: -.2px; }
+.header-logo-dot  { font-size: 18px; font-weight: 900; color: var(--green); }
+.header-logo-sub  { font-size: 11px; font-weight: 900; color: var(--green); margin-left: 6px; letter-spacing: .5px; }
+.header-logo-badge {
+  font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: .4px;
+  padding: 2px 7px; background: rgba(255,255,255,.12); color: rgba(255,255,255,.7);
+  border-radius: var(--radius); margin-left: 8px;
+}
+.header-nav { display: flex; height: 100%; margin-left: 16px; gap: 2px; }
+.header-nav-item {
+  display: flex; align-items: center; padding: 0 14px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+  color: rgba(255,255,255,.45); cursor: pointer; transition: all .15s;
+  border-bottom: 3px solid transparent; min-height: 44px;
+}
+.header-nav-item:hover  { color: rgba(255,255,255,.75); }
+.header-nav-item.active { color: #fff; border-bottom-color: var(--green); }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.notif-btn {
+  position: relative; width: 36px; height: 36px;
+  background: rgba(255,255,255,.08); border: none; cursor: pointer;
+  border-radius: var(--radius); display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: rgba(255,255,255,.7); transition: background .15s;
+}
+.notif-btn:hover { background: rgba(255,255,255,.15); }
+.notif-badge {
+  position: absolute; top: -4px; right: -4px;
+  width: 16px; height: 16px; background: var(--red); border-radius: 50%;
+  font-size: 9px; font-weight: 900; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--navy);
+}
+.role-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.08); border: none; cursor: pointer;
+  border-radius: var(--radius); padding: 6px 10px; min-height: 44px;
+  transition: background .15s;
+}
+.role-btn:hover { background: rgba(255,255,255,.15); }
+.role-btn-avatar {
+  width: 26px; height: 26px; background: var(--blue);
+  border-radius: var(--radius); display: flex; align-items: center;
+  justify-content: center; font-size: 10px; font-weight: 900; color: #fff;
+}
+.role-btn-info { text-align: left; }
+.role-btn-name { font-size: 11px; font-weight: 700; color: #fff; }
+.role-btn-role { font-size: 9px; font-weight: 600; color: var(--green); text-transform: uppercase; letter-spacing: .4px; }
+.hamburger-btn {
+  display: none; background: none; border: none;
+  cursor: pointer; padding: 8px; color: #fff; font-size: 20px;
+}
+
+/* --- Subnav (desktop only when shown) --- */
+.app-subnav {
+  background: var(--white); border-bottom: 2px solid var(--grey-bd);
+  height: var(--subnav-h); display: flex; align-items: stretch;
+  padding: 0 16px; gap: 0; flex-shrink: 0; overflow-x: auto;
+}
+.app-subnav::-webkit-scrollbar { display: none; }
+.subnav-item {
+  display: flex; align-items: center; padding: 0 14px;
+  font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent;
+  transition: all .15s; white-space: nowrap; min-height: 44px;
+}
+.subnav-item:hover  { color: var(--blue); }
+.subnav-item.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+/* --- Body layout --- */
+.app-body { flex: 1; display: flex; overflow: hidden; }
+
+/* --- Sidebar (desktop/tablet) --- */
+.sidebar {
+  width: var(--sidebar-w); background: var(--white);
+  border-right: 1px solid var(--grey-bd); flex-shrink: 0;
+  display: flex; flex-direction: column; overflow-y: auto;
+  transition: transform .25s ease, width .25s ease;
+}
+.sidebar.collapsed { width: 0; overflow: hidden; }
+.sidebar-section { padding: 12px 0 4px; }
+.sidebar-section-lbl {
+  font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: .8px;
+  color: var(--muted); padding: 0 14px 4px;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; font-size: 11px; font-weight: 700; color: var(--muted);
+  cursor: pointer; border-left: 3px solid transparent;
+  transition: all .12s; text-transform: uppercase; letter-spacing: .3px;
+  min-height: 44px; text-decoration: none;
+}
+.sb-item:hover  { background: var(--grey-bg); color: var(--navy); }
+.sb-item.active { background: var(--blue-lt); color: var(--blue); border-left-color: var(--blue); font-weight: 800; }
+.sb-icon { font-size: 15px; flex-shrink: 0; }
+.sb-count {
+  margin-left: auto; font-size: 9px; font-weight: 800;
+  background: var(--blue); color: #fff;
+  padding: 1px 6px; border-radius: 10px;
+}
+
+/* --- Main content area --- */
+.main-content { flex: 1; overflow-y: auto; overflow-x: hidden; }
+
+/* --- Mobile bottom nav --- */
+.mobile-nav {
+  display: none; background: var(--navy); height: var(--mob-nav-h);
+  flex-shrink: 0; align-items: stretch;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.mob-nav-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px;
+  cursor: pointer; border-top: 3px solid transparent;
+  transition: all .15s; min-height: 44px;
+}
+.mob-nav-item.active { border-top-color: var(--green); }
+.mob-nav-icon  { font-size: 18px; }
+.mob-nav-label { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: rgba(255,255,255,.45); }
+.mob-nav-item.active .mob-nav-label { color: var(--green); }
+
+/* --- Mobile header --- */
+.mobile-header {
+  display: none; background: var(--white);
+  border-bottom: 1px solid var(--grey-bd);
+  padding: 10px 16px; align-items: center; justify-content: space-between;
+  flex-shrink: 0; gap: 10px;
+}
+.mob-logo      { display: flex; align-items: baseline; }
+.mob-logo-main { font-size: 13px; font-weight: 900; color: var(--navy); }
+.mob-logo-dot  { font-size: 18px; font-weight: 900; color: var(--green); }
+.mob-logo-sub  { font-size: 11px; font-weight: 900; color: var(--green); margin-left: 6px; letter-spacing: .5px; }
+.mob-role-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--blue-lt); border: 1px solid var(--blue);
+  padding: 5px 10px; border-radius: var(--radius); cursor: pointer;
+}
+.mob-role-chip span { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--blue); letter-spacing: .4px; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+═══════════════════════════════════════════════════════════════════════ */
+/* Tablet (640–1024) — sidebar collapses by default */
+@media (max-width: 1024px) {
+  :root { --sidebar-w: 160px; }
+  .header-nav { display: none; }
+  .hamburger-btn { display: flex; align-items: center; }
+  .sidebar { position: fixed; top: calc(var(--stripe-h) + var(--header-h)); bottom: 0; left: 0; z-index: 500; }
+  .sidebar.collapsed { transform: translateX(-100%); width: var(--sidebar-w); }
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0; z-index: 499;
+    background: rgba(13,34,64,.5);
+  }
+  .sidebar-overlay.open { display: block; }
+}
+
+/* Mobile (< 640) */
+@media (max-width: 639px) {
+  .app-header    { display: none; }
+  .app-subnav    { display: none; }
+  .sidebar       { display: none; }
+  .mobile-header { display: flex; }
+  .mobile-nav    { display: flex; }
+  .main-content  { padding-bottom: 0; }
+  .pc-stripe     { display: none; } /* stripe is on mobile-header instead */
+  .mobile-header { flex-direction: column; padding: 0; }
+  .mob-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; width: 100%;
+  }
+  .mob-stripe { height: var(--stripe-h); width: 100%; background: linear-gradient(90deg,var(--blue) 0% 40%,var(--green) 40% 60%,var(--red) 60% 80%,var(--amber) 80% 100%); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PAGE: SCOUT HOME (F04)
+═══════════════════════════════════════════════════════════════════════ */
+.page { padding: 16px; min-height: 100%; }
+
+/* greeting bar */
+.greeting-bar {
+  background: var(--blue); border-radius: var(--radius);
+  padding: 14px 16px; margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.greeting-text { }
+.greeting-hello { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: rgba(255,255,255,.7); }
+.greeting-name  { font-size: 17px; font-weight: 900; color: #fff; margin-top: 1px; }
+.greeting-stats { display: flex; gap: 12px; }
+.g-stat { text-align: center; }
+.g-stat-val { font-size: 20px; font-weight: 900; color: #fff; line-height: 1; }
+.g-stat-lbl { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: rgba(255,255,255,.6); margin-top: 2px; }
+
+/* offline banner */
+.offline-banner {
+  background: var(--navy); border-radius: var(--radius);
+  padding: 10px 14px; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.offline-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green); flex-shrink: 0; animation: pulse 2s infinite;
+}
+.offline-text { font-size: 10px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: .3px; flex: 1; }
+.offline-count {
+  font-size: 9px; font-weight: 800; padding: 2px 8px;
+  background: rgba(91,173,55,.2); color: var(--green);
+  border: 1px solid rgba(91,173,55,.4); border-radius: var(--radius);
+}
+
+/* assignment cards */
+.assignment-card {
+  background: var(--white); border: 1px solid var(--grey-bd);
+  border-left: 4px solid var(--blue); border-radius: var(--radius);
+  padding: 12px 14px; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; transition: all .15s; min-height: 68px;
+}
+.assignment-card:hover { border-left-color: var(--green); box-shadow: var(--shadow); }
+.assignment-card.urgent { border-left-color: var(--green); }
+.player-init {
+  width: 44px; height: 44px; background: var(--blue);
+  border-radius: var(--radius); display: flex; align-items: center;
+  justify-content: center; font-size: 14px; font-weight: 900; color: #fff; flex-shrink: 0;
+}
+.player-init.green { background: var(--green); }
+.player-init.grey  { background: var(--grey-mid); }
+.player-meta { flex: 1; min-width: 0; }
+.player-name { font-size: 13px; font-weight: 800; color: var(--navy); }
+.player-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 500; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PAGE: REPORT FORM (F05)
+═══════════════════════════════════════════════════════════════════════ */
+.page-header {
+  background: var(--navy); padding: 12px 16px;
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.page-back {
+  width: 36px; height: 36px; background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2); border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: #fff; font-size: 16px; flex-shrink: 0;
+  min-width: 44px; min-height: 44px;
+}
+.page-header-info { flex: 1; }
+.page-title { font-size: 14px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: .4px; }
+.page-subtitle { font-size: 11px; color: var(--green); margin-top: 1px; font-weight: 600; }
+
+.match-context-box {
+  background: var(--grey-bg); border: 1px solid var(--grey-bd);
+  border-left: 4px solid var(--blue); border-radius: var(--radius);
+  padding: 10px 14px; font-size: 12px; font-weight: 700; color: var(--navy);
+}
+
+.findings-box {
+  background: var(--grey-bg); border: 1px solid var(--grey-bd);
+  border-radius: var(--radius); padding: 12px; position: relative;
+}
+.voice-indicator {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .4px;
+  padding: 3px 9px; background: var(--red); color: #fff;
+  border-radius: var(--radius); margin-bottom: 8px;
+}
+.voice-dot { width: 5px; height: 5px; border-radius: 50%; background: #fff; animation: blink 1s infinite; }
+.findings-text { font-size: 12px; font-weight: 500; color: var(--text); line-height: 1.75; }
+
+.attach-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.attach-box {
+  width: 64px; height: 64px; border: 2px solid var(--grey-bd);
+  background: var(--grey-bg); border-radius: var(--radius);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 4px; cursor: pointer; transition: all .15s;
+  min-height: 64px;
+}
+.attach-box.filled { border-color: var(--blue); background: var(--blue-lt); }
+.attach-box:hover  { border-color: var(--navy); }
+.attach-lbl { font-size: 8px; font-weight: 700; text-transform: uppercase; color: var(--muted); }
+
+/* sticky submit */
+.sticky-submit {
+  position: sticky; bottom: 0; left: 0; right: 0;
+  padding: 12px 16px; background: var(--white);
+  border-top: 1px solid var(--grey-bd); z-index: 50;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PAGE: SYNC ANIMATION (F06)
+═══════════════════════════════════════════════════════════════════════ */
+.sync-page {
+  min-height: 100%; background: var(--navy); display: flex;
+  flex-direction: column; align-items: center; justify-content: center;
+  padding: 32px; text-align: center; gap: 24px;
+}
+.sync-ring-wrap {
+  width: 96px; height: 96px; position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.sync-outer { position: absolute; inset: 0; border-radius: 50%; border: 3px solid rgba(255,255,255,.08); border-top-color: var(--green); animation: spin 1.1s linear infinite; }
+.sync-inner { position: absolute; inset: 12px; border-radius: 50%; border: 2px solid rgba(255,255,255,.06); border-top-color: var(--blue); animation: spin .75s linear infinite reverse; }
+.sync-icon  { font-size: 32px; }
+.sync-title { font-size: 20px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: .5px; }
+.sync-sub   { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .5px; }
+.sync-steps { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 380px; }
+.sync-step {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border: 2px solid rgba(255,255,255,.07);
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px;
+  color: rgba(255,255,255,.25); border-radius: var(--radius);
+  opacity: 0; transform: translateX(-8px); transition: all .35s ease;
+}
+.sync-step.done { opacity: 1; transform: translateX(0); color: #fff; background: rgba(91,173,55,.1); border-color: rgba(91,173,55,.35); }
+.step-check { width: 20px; height: 20px; border-radius: var(--radius); background: var(--green); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; color: #fff; flex-shrink: 0; }
+.sync-continue { margin-top: 8px; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PAGE: CENTRAL STAFF DASHBOARD (F07)
+═══════════════════════════════════════════════════════════════════════ */
+.dash-page { padding: 14px; }
+
+.stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px;
+}
+@media (max-width: 900px)  { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 639px)  { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.stat-card {
+  background: var(--white); border: 1px solid var(--grey-bd);
+  border-top: 3px solid var(--blue); border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.stat-card.green-top { border-top-color: var(--green); }
+.stat-val   { font-size: 22px; font-weight: 900; color: var(--navy); line-height: 1; }
+.stat-lbl   { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-top: 4px; }
+.stat-delta { font-size: 10px; font-weight: 700; color: var(--green); margin-top: 4px; }
+
+/* notification bar */
+.notif-bar {
+  background: var(--white); border: 1px solid var(--grey-bd);
+  border-left: 4px solid var(--green); border-radius: var(--radius);
+  padding: 10px 14px; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; transition: background .15s;
+}
+.notif-bar:hover { background: var(--grey-bg); }
+.notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 1.5s infinite; flex-shrink: 0; }
+.notif-body { flex: 1; font-size: 12px; font-weight: 600; color: var(--text); }
+.notif-body strong { color: var(--blue); font-weight: 800; }
+.notif-cta  { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--green); letter-spacing: .4px; white-space: nowrap; }
+
+/* player table */
+.table-card { background: var(--white); border: 1px solid var(--grey-bd); border-radius: var(--radius); overflow: hidden; }
+.table-toolbar {
+  padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--grey-bd); flex-wrap: wrap;
+}
+.table-search {
+  flex: 1; min-width: 160px; padding: 8px 12px; font-size: 14px; font-weight: 500;
+  border: 1px solid var(--grey-bd); border-radius: var(--radius);
+  background: var(--grey-bg); color: var(--text);
+}
+.table-search:focus { border-color: var(--blue); background: var(--white); }
+.table-wrap { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; min-width: 500px; }
+.data-table thead tr { background: var(--navy); }
+.data-table th {
+  padding: 8px 12px; text-align: left; font-size: 9px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .6px; color: rgba(255,255,255,.75);
+  white-space: nowrap; border-right: 1px solid rgba(255,255,255,.06);
+}
+.data-table th:last-child { border-right: none; }
+.data-table th.sortable { cursor: pointer; }
+.data-table th.sortable:hover { color: #fff; }
+.data-table tbody tr { border-bottom: 1px solid var(--grey-bd); cursor: pointer; transition: background .1s; }
+.data-table tbody tr:hover { background: #F0F5FF; }
+.data-table tbody tr.hl   { background: var(--blue-lt); }
+.data-table tbody tr:last-child { border-bottom: none; }
+.data-table td { padding: 10px 12px; font-size: 12px; color: var(--text); white-space: nowrap; }
+.p-name   { font-weight: 800; color: var(--navy); }
+.p-county { font-size: 10px; color: var(--muted); font-weight: 500; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PAGE: PLAYER PROFILE (F08)
+═══════════════════════════════════════════════════════════════════════ */
+.profile-header {
+  background: var(--navy); padding: 16px;
+  display: flex; align-items: flex-start; gap: 14px; flex-shrink: 0;
+}
+.profile-avatar {
+  width: 56px; height: 56px; background: var(--blue);
+  border: 2px solid rgba(255,255,255,.15); border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 900; color: #fff; flex-shrink: 0;
+}
+.profile-meta-wrap { flex: 1; min-width: 0; }
+.profile-name {
+  font-size: 20px; font-weight: 900; color: #fff;
+  text-transform: uppercase; letter-spacing: .4px;
+}
+.profile-meta {
+  display: flex; gap: 12px; flex-wrap: wrap; margin-top: 5px;
+}
+.profile-meta span {
+  font-size: 10px; font-weight: 600; color: rgba(255,255,255,.55);
+  display: flex; align-items: center; gap: 3px;
+  text-transform: uppercase; letter-spacing: .3px;
+}
+.profile-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.ptag { font-size: 9px; font-weight: 800; text-transform: uppercase; padding: 3px 9px; border-radius: var(--radius); letter-spacing: .3px; }
+.ptag-blue  { background: var(--blue);  color: #fff; }
+.ptag-green { background: var(--green); color: #fff; }
+.ptag-nav   { background: rgba(255,255,255,.12); color: rgba(255,255,255,.8); }
+.profile-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+@media (min-width: 640px) {
+  .profile-actions { flex-direction: column; align-items: flex-end; margin-top: 0; flex-shrink: 0; }
+}
+
+/* Profile body grid */
+.profile-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px; padding: 14px;
+}
+@media (max-width: 900px) { .profile-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 639px) { .profile-grid { grid-template-columns: 1fr; } }
+
+.profile-card {
+  background: var(--white); border: 1px solid var(--grey-bd);
+  border-top: 3px solid var(--blue); border-radius: var(--radius);
+  padding: 14px; display: flex; flex-direction: column; gap: 0;
+}
+.profile-card.green-top { border-top-color: var(--green); }
+.profile-card.navy-top  { border-top-color: var(--navy); }
+.pcard-title {
+  font-size: 9px; font-weight: 900; text-transform: uppercase;
+  letter-spacing: .6px; color: var(--navy); margin-bottom: 12px;
+}
+
+/* AI sentiment */
+.ai-label {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .4px;
+  padding: 3px 9px; background: var(--blue); color: #fff;
+  border-radius: var(--radius); margin-bottom: 10px;
+}
+.ai-quote {
+  font-size: 12px; font-weight: 500; color: var(--text);
+  line-height: 1.7; font-style: italic;
+}
+.theme-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; }
+
+/* Scout reports */
+.report-item {
+  padding: 10px 12px; border: 1px solid var(--grey-bd);
+  border-left: 3px solid var(--blue); border-radius: var(--radius);
+  margin-bottom: 8px; background: var(--white);
+}
+.report-item.new { border-left-color: var(--green); }
+.ri-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; gap: 8px; }
+.ri-scout  { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--navy); }
+.ri-date   { font-size: 9px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.ri-text   { font-size: 11px; font-weight: 500; color: var(--muted); line-height: 1.55; }
+
+/* Video card */
+.video-card {
+  background: var(--navy); border-radius: var(--radius);
+  padding: 12px 14px; display: flex; align-items: center;
+  gap: 12px; cursor: pointer; margin-top: auto;
+  transition: background .15s;
+}
+.video-card:hover { background: var(--navy-lt); }
+.play-circle {
+  width: 42px; height: 42px; border-radius: var(--radius);
+  background: var(--green); display: flex; align-items: center;
+  justify-content: center; font-size: 16px; color: #fff; flex-shrink: 0;
+}
+.vm-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #fff; letter-spacing: .3px; }
+.vm-sub   { font-size: 10px; color: rgba(255,255,255,.5); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   NOTIFICATIONS DRAWER (F20 — baked in)
+═══════════════════════════════════════════════════════════════════════ */
+.notif-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 700;
+  width: 320px; background: var(--white); border-left: 1px solid var(--grey-bd);
+  display: flex; flex-direction: column;
+  transform: translateX(100%); transition: transform .25s ease;
+  box-shadow: -8px 0 24px rgba(0,0,0,.15);
+}
+.notif-drawer.open { transform: translateX(0); }
+.drawer-header {
+  background: var(--navy); padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.drawer-title { font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .6px; color: #fff; }
+.drawer-close {
+  width: 32px; height: 32px; background: rgba(255,255,255,.1); border: none;
+  border-radius: var(--radius); cursor: pointer; color: #fff; font-size: 18px;
+  display: flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px;
+}
+.drawer-body { flex: 1; overflow-y: auto; padding: 12px; }
+.notif-item {
+  padding: 12px; border: 1px solid var(--grey-bd);
+  border-left: 3px solid var(--blue); border-radius: var(--radius);
+  margin-bottom: 8px; cursor: pointer; transition: background .15s;
+}
+.notif-item:hover { background: var(--grey-bg); }
+.notif-item.unread { border-left-color: var(--green); background: var(--green-lt); }
+.notif-item-title { font-size: 11px; font-weight: 800; color: var(--navy); margin-bottom: 3px; }
+.notif-item-body  { font-size: 11px; color: var(--muted); font-weight: 500; line-height: 1.5; }
+.notif-item-time  { font-size: 9px; color: var(--muted); margin-top: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+.drawer-overlay { position: fixed; inset: 0; z-index: 699; background: rgba(13,34,64,.4); display: none; }
+.drawer-overlay.open { display: block; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   COMPARISON WIDGET (F09 — inline on profile)
+═══════════════════════════════════════════════════════════════════════ */
+.comp-header-row { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.comp-pname { flex: 1; font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--navy); text-align: center; }
+.comp-vs    { font-size: 9px; font-weight: 900; color: var(--muted); }
+.comp-line  { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.comp-lbl   { font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--muted); width: 70px; text-align: right; flex-shrink: 0; }
+.comp-bars  { flex: 1; display: flex; align-items: center; gap: 4px; }
+.cbar       { height: 5px; border-radius: 0; flex: 1; }
+.cnum       { font-size: 9px; font-weight: 900; color: var(--navy); width: 22px; text-align: center; flex-shrink: 0; }
+.cdiv       { font-size: 9px; color: var(--grey-bd); }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     F01 — PASSWORD SCREEN
+════════════════════════════════════════════════════════════════════ -->
+<div id="auth-screen">
+  <div class="auth-card fu">
+    <div class="auth-stripe"></div>
+    <div class="auth-logo">
+      <span class="auth-logo-main">PLAY-CRICKET</span>
+      <span class="auth-logo-dot">.</span>
+      <span class="auth-logo-sub">SCOUT INTELLIGENCE</span>
+    </div>
+    <div class="auth-headline">Prototype Access</div>
+    <div class="auth-sub">ECB Scouting &amp; Performance Platform — Confidential</div>
+    <div class="form-group">
+      <label class="form-label" for="auth-input">Access Password</label>
+      <input class="form-input" id="auth-input" type="password"
+             placeholder="Enter password" autocomplete="current-password">
+      <div class="auth-error" id="auth-error">Incorrect password. Please try again.</div>
+    </div>
+    <button class="btn btn-green btn-full" onclick="checkAuth()">Access Platform →</button>
+    <div class="auth-hint">
+      For demo: password is <span>ECBScout2026</span>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar overlay (tablet) -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- Notifications drawer -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="notif-drawer" id="notif-drawer">
+  <div class="pc-stripe"></div>
+  <div class="drawer-header">
+    <span class="drawer-title">Notifications</span>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="notif-item unread" onclick="navigate('player')">
+      <div class="notif-item-title">New report — Oliver Turner</div>
+      <div class="notif-item-body">J. Whitfield filed a report: High readiness · Potential A · AI summary ready</div>
+      <div class="notif-item-time">Just now</div>
+    </div>
+    <div class="notif-item unread">
+      <div class="notif-item-title">Benchmark reached — Tom Griffiths</div>
+      <div class="notif-item-body">Readiness score exceeded 75 threshold for Test format</div>
+      <div class="notif-item-time">2 hours ago</div>
+    </div>
+    <div class="notif-item">
+      <div class="notif-item-title">New assignment — Aryan Singh</div>
+      <div class="notif-item-body">Lancashire v Yorkshire tomorrow 11:00. Report due by 18:00.</div>
+      <div class="notif-item-time">Yesterday</div>
+    </div>
+    <div class="notif-item">
+      <div class="notif-item-title">Coach referral received</div>
+      <div class="notif-item-body">D. Clarke referred Jamie Oakes (Essex, 16) — left-arm seam. Pending review.</div>
+      <div class="notif-item-time">2 days ago</div>
+    </div>
+    <div class="notif-item">
+      <div class="notif-item-title">Sync complete</div>
+      <div class="notif-item-body">3 reports synced to GCP Data Warehouse successfully</div>
+      <div class="notif-item-time">2 days ago</div>
+    </div>
+  </div>
+</div>
+
+<!-- F03 — Role switcher modal -->
+<div id="role-modal">
+  <div class="role-modal-card fu">
+    <div class="role-modal-title">Switch Role</div>
+    <div class="role-modal-sub">Select your role to see the relevant view of the platform</div>
+    <div class="role-options">
+      <div class="role-option" id="role-scout" onclick="selectRole('scout')">
+        <div class="role-icon" style="background:#EEF4FF">📱</div>
+        <div class="role-info">
+          <div class="role-name">Scout</div>
+          <div class="role-desc">Mobile field view · Report filing · Player assignments</div>
+        </div>
+        <div class="role-check">✓</div>
+      </div>
+      <div class="role-option" id="role-central" onclick="selectRole('central')">
+        <div class="role-icon" style="background:#EDFBEE">📊</div>
+        <div class="role-info">
+          <div class="role-name">Central Staff</div>
+          <div class="role-desc">Dashboards · Player comparison · Depth charts</div>
+        </div>
+        <div class="role-check">✓</div>
+      </div>
+      <div class="role-option" id="role-selector" onclick="selectRole('selector')">
+        <div class="role-icon" style="background:#F5F0FF">🏏</div>
+        <div class="role-info">
+          <div class="role-name">Selector</div>
+          <div class="role-desc">Squad selection · Full player intelligence access</div>
+        </div>
+        <div class="role-check">✓</div>
+      </div>
+    </div>
+    <button class="btn btn-navy btn-full" onclick="closeRoleModal()">Confirm Role →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     F02 — APP SHELL
+════════════════════════════════════════════════════════════════════ -->
+<div id="app" style="display:none">
+
+  <!-- Play-Cricket stripe -->
+  <div class="pc-stripe"></div>
+
+  <!-- Desktop/Tablet header -->
+  <header class="app-header">
+    <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+    <a class="header-logo" href="#">
+      <span class="header-logo-main">PLAY-CRICKET</span>
+      <span class="header-logo-dot">.</span>
+      <span class="header-logo-sub">SCOUT</span>
+      <span class="header-logo-badge">ECB</span>
+    </a>
+    <nav class="header-nav" id="desktop-nav">
+      <div class="header-nav-item active" onclick="navigate('dashboard')">Dashboard</div>
+      <div class="header-nav-item" onclick="navigate('players')">Players</div>
+      <div class="header-nav-item" onclick="navigate('depth')">Depth Charts</div>
+      <div class="header-nav-item" onclick="navigate('compare')">Compare</div>
+      <div class="header-nav-item" onclick="navigate('analytics')">Analytics</div>
+    </nav>
+    <div class="header-right">
+      <button class="notif-btn" onclick="openDrawer()" aria-label="Notifications">
+        🔔 <span class="notif-badge" id="notif-count">2</span>
+      </button>
+      <button class="role-btn" onclick="openRoleModal()">
+        <div class="role-btn-avatar" id="header-avatar">SR</div>
+        <div class="role-btn-info">
+          <div class="role-btn-name" id="header-name">S. Roberts</div>
+          <div class="role-btn-role" id="header-role">Central Staff</div>
+        </div>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile header -->
+  <div class="mobile-header" id="mobile-header">
+    <div class="mob-stripe"></div>
+    <div class="mob-top">
+      <div class="mob-logo">
+        <span class="mob-logo-main">PLAY-CRICKET</span>
+        <span class="mob-logo-dot">.</span>
+        <span class="mob-logo-sub">SCOUT</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="notif-btn" onclick="openDrawer()" style="background:rgba(0,0,0,.06);color:var(--navy)" aria-label="Notifications">
+          🔔 <span class="notif-badge" style="border-color:#fff" id="mob-notif-count">2</span>
+        </button>
+        <div class="mob-role-chip" onclick="openRoleModal()">
+          <span id="mob-role-label">Scout</span>
+          <span style="font-size:10px;color:var(--blue)">▾</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subnav (shown contextually) -->
+  <div class="app-subnav hidden" id="app-subnav">
+    <div class="subnav-item active" onclick="setSubnav(this,'all')">Long List</div>
+    <div class="subnav-item" onclick="setSubnav(this,'short')">Short List</div>
+    <div class="subnav-item" onclick="setSubnav(this,'reports')">Reports</div>
+    <div class="subnav-item" onclick="setSubnav(this,'referrals')">Referrals</div>
+  </div>
+
+  <!-- App body -->
+  <div class="app-body">
+
+    <!-- Sidebar -->
+    <aside class="sidebar collapsed" id="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-lbl">Main</div>
+        <div class="sb-item active" onclick="navigate('dashboard')"><span class="sb-icon">🏠</span>Overview</div>
+        <div class="sb-item" onclick="navigate('players')"><span class="sb-icon">👥</span>Long List <span class="sb-count">248</span></div>
+        <div class="sb-item" onclick="navigate('shortlist')"><span class="sb-icon">⭐</span>Short List <span class="sb-count">18</span></div>
+        <div class="sb-item" onclick="navigate('depth')"><span class="sb-icon">📐</span>Depth Charts</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-lbl">Intelligence</div>
+        <div class="sb-item" onclick="navigate('compare')"><span class="sb-icon">⚖️</span>Compare</div>
+        <div class="sb-item" onclick="navigate('matrix')"><span class="sb-icon">📊</span>Matrix</div>
+        <div class="sb-item" onclick="navigate('analytics')"><span class="sb-icon">📈</span>Analytics</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-lbl">Scouts</div>
+        <div class="sb-item" onclick="navigate('accuracy')"><span class="sb-icon">🎯</span>Accuracy</div>
+        <div class="sb-item" onclick="navigate('referrals')"><span class="sb-icon">🔍</span>Referrals <span class="sb-count">3</span></div>
+      </div>
+      <div class="sidebar-section" style="margin-top:auto">
+        <div class="sb-item" onclick="openRoleModal()"><span class="sb-icon">🔄</span>Switch Role</div>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+      <!-- Content injected by JS -->
+    </main>
+
+  </div>
+
+  <!-- Mobile bottom nav -->
+  <nav class="mobile-nav" id="mobile-nav">
+    <div class="mob-nav-item active" onclick="navigate('home')">
+      <div class="mob-nav-icon">🏠</div>
+      <div class="mob-nav-label">Home</div>
+    </div>
+    <div class="mob-nav-item" onclick="navigate('report')">
+      <div class="mob-nav-icon">📋</div>
+      <div class="mob-nav-label">Report</div>
+    </div>
+    <div class="mob-nav-item" onclick="navigate('players')">
+      <div class="mob-nav-icon">👥</div>
+      <div class="mob-nav-label">Players</div>
+    </div>
+    <div class="mob-nav-item" onclick="navigate('video')">
+      <div class="mob-nav-icon">🎥</div>
+      <div class="mob-nav-label">Video</div>
+    </div>
+    <div class="mob-nav-item" onclick="navigate('dashboard')">
+      <div class="mob-nav-icon">📊</div>
+      <div class="mob-nav-label">Dashboard</div>
+    </div>
+  </nav>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     JAVASCRIPT — Auth, Routing, State, Pages
+════════════════════════════════════════════════════════════════════ -->
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────
+const PASSWORD_HASH = '0c497eaf558f2385ad458627e82ffcf51e8aaab1638ed03817f44df3132e79a0';
+const SESSION_KEY   = 'ecb_scout_authed';
+const ROLE_KEY      = 'ecb_scout_role';
+
+// ── STATE ────────────────────────────────────────────────────────────
+let state = {
+  role:        localStorage.getItem(ROLE_KEY) || 'central',
+  page:        'dashboard',
+  subpage:     null,
+  sidebarOpen: false,
+  drawerOpen:  false,
+};
+
+// ── DATA ─────────────────────────────────────────────────────────────
+const PLAYERS = [
+  { id:'p1', init:'OT', color:'green',  name:'Oliver Turner',  county:'Yorkshire',      arch:'arch-bat',  archLabel:'Top-order bat',  age:17, readiness:82, potential:'A', format:'Test', reports:4,  isNew:true  },
+  { id:'p2', init:'MW', color:'blue',   name:'Marcus Webb',    county:'Surrey',         arch:'arch-bowl', archLabel:'Seam bowling',   age:19, readiness:74, potential:'A', format:'Test', reports:6,  isNew:false },
+  { id:'p3', init:'AS', color:'navy',   name:'Aryan Singh',    county:'Lancashire',     arch:'arch-all',  archLabel:'Allrounder',     age:18, readiness:67, potential:'B', format:'ODI',  reports:3,  isNew:false },
+  { id:'p4', init:'TG', color:'green',  name:'Tom Griffiths',  county:'Glamorgan',      arch:'arch-wk',   archLabel:'Wicket-keeper',  age:20, readiness:78, potential:'A', format:'Test', reports:5,  isNew:false },
+  { id:'p5', init:'CD', color:'blue',   name:'Callum Drake',   county:'Nottinghamshire',arch:'arch-la',   archLabel:'Left-arm seam',  age:19, readiness:61, potential:'B', format:'Test', reports:2,  isNew:false },
+  { id:'p6', init:'RH', color:'grey',   name:'Ryan Hughes',    county:'Warwickshire',   arch:'arch-spin', archLabel:'Spin bowling',   age:21, readiness:70, potential:'B', format:'ODI',  reports:4,  isNew:false },
+  { id:'p7', init:'JO', color:'green',  name:'Jamie Oakes',    county:'Essex',          arch:'arch-la',   archLabel:'Left-arm seam',  age:16, readiness:55, potential:'A', format:'Test', reports:1,  isNew:true  },
+];
+
+const ROLES = {
+  scout:    { name:'J. Whitfield', label:'Scout',         init:'JW', color:'#5BAD37' },
+  central:  { name:'S. Roberts',   label:'Central Staff', init:'SR', color:'#1565C0' },
+  selector: { name:'A. Fletcher',  label:'Selector',      init:'AF', color:'#5E35B1' },
+};
+
+// ── AUTH ─────────────────────────────────────────────────────────────
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function checkAuth() {
+  const pw = document.getElementById('auth-input').value;
+  const hash = await sha256(pw);
+  if (hash === PASSWORD_HASH) {
+    localStorage.setItem(SESSION_KEY, '1');
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    initApp();
+  } else {
+    const err = document.getElementById('auth-error');
+    err.style.display = 'block';
+    document.getElementById('auth-input').value = '';
+    document.getElementById('auth-input').focus();
+    setTimeout(() => err.style.display = 'none', 3000);
+  }
+}
+document.getElementById('auth-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkAuth();
+});
+
+function initApp() {
+  applyRole(state.role);
+  const defaultPage = state.role === 'scout' ? 'home' : 'dashboard';
+  navigate(defaultPage);
+}
+
+// Auto-auth if session exists
+if (localStorage.getItem(SESSION_KEY)) {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  initApp();
+}
+
+// ── ROLE ──────────────────────────────────────────────────────────────
+function openRoleModal() {
+  document.getElementById('role-modal').classList.add('open');
+  document.querySelectorAll('.role-option').forEach(o => o.classList.remove('selected'));
+  const sel = document.getElementById('role-' + state.role);
+  if (sel) sel.classList.add('selected');
+}
+function closeRoleModal() {
+  document.getElementById('role-modal').classList.remove('open');
+}
+function selectRole(role) {
+  state.role = role;
+  localStorage.setItem(ROLE_KEY, role);
+  document.querySelectorAll('.role-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('role-' + role).classList.add('selected');
+  applyRole(role);
+  closeRoleModal();
+  const defaultPage = role === 'scout' ? 'home' : 'dashboard';
+  navigate(defaultPage);
+}
+function applyRole(role) {
+  const r = ROLES[role];
+  document.getElementById('header-avatar').textContent = r.init;
+  document.getElementById('header-avatar').style.background = r.color;
+  document.getElementById('header-name').textContent = r.name;
+  document.getElementById('header-role').textContent = r.label;
+  document.getElementById('mob-role-label').textContent = r.label;
+}
+
+// ── SIDEBAR ──────────────────────────────────────────────────────────
+function toggleSidebar() {
+  state.sidebarOpen = !state.sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed', !state.sidebarOpen);
+  document.getElementById('sidebar-overlay').classList.toggle('open', state.sidebarOpen);
+}
+function closeSidebar() {
+  state.sidebarOpen = false;
+  document.getElementById('sidebar').classList.add('collapsed');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+// Auto-open sidebar on wide screens
+function checkSidebarAuto() {
+  if (window.innerWidth >= 1025) {
+    document.getElementById('sidebar').classList.remove('collapsed');
+    state.sidebarOpen = true;
+  } else {
+    document.getElementById('sidebar').classList.add('collapsed');
+    state.sidebarOpen = false;
+    document.getElementById('sidebar-overlay').classList.remove('open');
+  }
+}
+window.addEventListener('resize', checkSidebarAuto);
+checkSidebarAuto();
+
+// ── NOTIFICATIONS ────────────────────────────────────────────────────
+function openDrawer() {
+  document.getElementById('notif-drawer').classList.add('open');
+  document.getElementById('drawer-overlay').classList.add('open');
+  document.getElementById('notif-count').textContent = '0';
+  document.getElementById('mob-notif-count').textContent = '0';
+}
+function closeDrawer() {
+  document.getElementById('notif-drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
+}
+
+// ── SUBNAV ────────────────────────────────────────────────────────────
+function setSubnav(el, key) {
+  document.querySelectorAll('.subnav-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+}
+function showSubnav(show) {
+  document.getElementById('app-subnav').classList.toggle('hidden', !show);
+}
+
+// ── NAV HELPERS ───────────────────────────────────────────────────────
+function setDesktopNav(id) {
+  document.querySelectorAll('.header-nav-item').forEach(i => i.classList.remove('active'));
+  const items = document.querySelectorAll('.header-nav-item');
+  const map = { dashboard:0, players:1, depth:2, compare:3, analytics:4 };
+  if (map[id] !== undefined) items[map[id]].classList.add('active');
+}
+function setMobileNav(id) {
+  document.querySelectorAll('.mob-nav-item').forEach(i => i.classList.remove('active'));
+  const items = document.querySelectorAll('.mob-nav-item');
+  const map = { home:0, report:1, players:2, video:3, dashboard:4 };
+  if (map[id] !== undefined) items[map[id]].classList.add('active');
+}
+function setSidebarActive(id) {
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  const map = { dashboard:'overview', players:'long-list', shortlist:'short-list', depth:'depth', compare:'compare', matrix:'matrix', analytics:'analytics', accuracy:'accuracy', referrals:'referrals' };
+}
+
+// ── ROUTER ────────────────────────────────────────────────────────────
+function navigate(page, param) {
+  state.page = page;
+  setDesktopNav(page);
+  setMobileNav(page);
+  closeSidebar();
+  const content = document.getElementById('main-content');
+  content.scrollTop = 0;
+  showSubnav(false);
+
+  const renders = {
+    home:      renderScoutHome,
+    report:    renderReportForm,
+    sync:      renderSync,
+    dashboard: renderDashboard,
+    player:    renderPlayerProfile,
+    players:   renderDashboard,
+    shortlist: renderDashboard,
+    depth:     renderComingSoon.bind(null,'Depth Charts','📐','Drag-and-drop squad depth charts by position. Available in Phase 2.'),
+    compare:   renderComingSoon.bind(null,'Player Comparison','⚖️','Side-by-side comparison of up to 4 players across all metrics. Available in Phase 2.'),
+    matrix:    renderComingSoon.bind(null,'Potential vs Performance Matrix','📊','2×2 scatter plot showing player prioritisation. Available in Phase 2.'),
+    analytics: renderComingSoon.bind(null,'Platform Analytics','📈','Usage metrics, scout activity, KPI tracking. Available in Phase 2.'),
+    accuracy:  renderComingSoon.bind(null,'Scout Accuracy','🎯','Annual accuracy leaderboard and scoring breakdown. Available in Phase 2.'),
+    referrals: renderComingSoon.bind(null,'Coach Referrals','🔍','Pending referrals queue with approve/reject workflow. Available in Phase 2.'),
+    video:     renderComingSoon.bind(null,'Video Library','🎥','Match video linked to scouting reports via GCP Data Warehouse. Available in Phase 2.'),
+  };
+  content.innerHTML = (renders[page] || renders.dashboard)(param);
+  animatePage();
+}
+
+function animatePage() {
+  document.querySelectorAll('.fu').forEach((el, i) => {
+    el.style.animationDelay = (i * 0.04) + 's';
+  });
+}
+
+// ── PAGE: SCOUT HOME (F04) ────────────────────────────────────────────
+function renderScoutHome() {
+  return `
+  <div class="page">
+    <div class="greeting-bar fu">
+      <div class="greeting-text">
+        <div class="greeting-hello">Good afternoon</div>
+        <div class="greeting-name">James Whitfield</div>
+      </div>
+      <div class="greeting-stats">
+        <div class="g-stat"><div class="g-stat-val">3</div><div class="g-stat-lbl">Today</div></div>
+        <div class="g-stat"><div class="g-stat-val">12</div><div class="g-stat-lbl">Month</div></div>
+        <div class="g-stat"><div class="g-stat-val">89%</div><div class="g-stat-lbl">Coverage</div></div>
+      </div>
+    </div>
+
+    <div class="offline-banner fu fu1">
+      <div class="offline-dot"></div>
+      <div class="offline-text">Offline Mode Active — 2 reports queued</div>
+      <div class="offline-count">Sync pending</div>
+    </div>
+
+    <div class="section-title fu fu2">Today's Assignments</div>
+
+    <div class="assignment-card urgent fu fu2" onclick="navigate('report')">
+      <div class="player-init green">OT</div>
+      <div class="player-meta">
+        <div class="player-name">Oliver Turner</div>
+        <div class="player-sub">Yorkshire · RHB / RMF · Age 17 · YKS vs DUR · Headingley</div>
+      </div>
+      <span class="badge badge-green">Now</span>
+    </div>
+
+    <div class="assignment-card fu fu3">
+      <div class="player-init">AS</div>
+      <div class="player-meta">
+        <div class="player-name">Aryan Singh</div>
+        <div class="player-sub">Lancashire · RHB / OB · Age 18 · LAN vs YKS · Old Trafford</div>
+      </div>
+      <span class="badge badge-grey">Tomorrow</span>
+    </div>
+
+    <div class="assignment-card fu fu4">
+      <div class="player-init" style="background:#5E35B1">CD</div>
+      <div class="player-meta">
+        <div class="player-name">Callum Drake</div>
+        <div class="player-sub">Nottinghamshire · LAM · Age 19 · NOTTS vs DERBY · Trent Bridge</div>
+      </div>
+      <span class="badge badge-grey">Thu 29 May</span>
+    </div>
+
+    <div class="section-title fu fu4" style="margin-top:18px">Recent Reports</div>
+
+    <div class="assignment-card fu fu5">
+      <div class="player-init grey">MW</div>
+      <div class="player-meta">
+        <div class="player-name">Marcus Webb</div>
+        <div class="player-sub">Surrey · Filed 2 days ago · Test Readiness</div>
+      </div>
+      <span class="badge badge-green">Synced ✓</span>
+    </div>
+    <div class="assignment-card fu fu5">
+      <div class="player-init grey">TG</div>
+      <div class="player-meta">
+        <div class="player-name">Tom Griffiths</div>
+        <div class="player-sub">Glamorgan · Filed 4 days ago · Young Lions</div>
+      </div>
+      <span class="badge badge-green">Synced ✓</span>
+    </div>
+  </div>`;
+}
+
+// ── PAGE: REPORT FORM (F05) ───────────────────────────────────────────
+function renderReportForm() {
+  return `
+  <div class="page-header">
+    <div class="page-back" onclick="navigate('home')">←</div>
+    <div class="page-header-info">
+      <div class="page-title">Scouting Report</div>
+      <div class="page-subtitle">Oliver Turner · Yorkshire</div>
+    </div>
+    <span class="badge badge-green">● Offline</span>
+  </div>
+
+  <div class="page" style="padding-bottom:100px">
+    <div class="form-group fu">
+      <label class="form-label">Match Context</label>
+      <div class="match-context-box">🏏 YKS vs DUR · Headingley · U18 Championship · Round 6 · 27 May 2026</div>
+    </div>
+
+    <div class="form-group fu fu1">
+      <label class="form-label">Report Type</label>
+      <div class="chips">
+        <div class="chip on-navy" onclick="toggleChip(this)">Young Lions</div>
+        <div class="chip on-blue" onclick="toggleChip(this)">Test Readiness</div>
+        <div class="chip" onclick="toggleChip(this)">ODI</div>
+        <div class="chip" onclick="toggleChip(this)">T20i</div>
+        <div class="chip" onclick="toggleChip(this)">Women's U19</div>
+      </div>
+    </div>
+
+    <div class="form-group fu fu2">
+      <label class="form-label">Archetype (select all that apply)</label>
+      <div class="chips">
+        <div class="chip on-blue" onclick="toggleChip(this)">Top-order bat</div>
+        <div class="chip on-green" onclick="toggleChip(this)">Seam allrounder</div>
+        <div class="chip" onclick="toggleChip(this)">Middle-order bat</div>
+        <div class="chip" onclick="toggleChip(this)">Seam bowling</div>
+        <div class="chip" onclick="toggleChip(this)">Left-arm seam</div>
+      </div>
+    </div>
+
+    <div class="form-group fu fu2">
+      <label class="form-label">Current Readiness</label>
+      <div class="r-grid">
+        <div class="r-btn on-g" onclick="selectReadiness(this,'.r-readiness')">High</div>
+        <div class="r-btn" onclick="selectReadiness(this,'.r-readiness')">Medium</div>
+        <div class="r-btn" onclick="selectReadiness(this,'.r-readiness')">Low</div>
+      </div>
+    </div>
+
+    <div class="form-group fu fu3">
+      <label class="form-label">Future Potential</label>
+      <div class="r-grid">
+        <div class="r-btn on-n r-potential" onclick="selectReadiness(this,'.r-potential')">A — International</div>
+        <div class="r-btn r-potential" onclick="selectReadiness(this,'.r-potential')">B — Pathway</div>
+        <div class="r-btn r-potential" onclick="selectReadiness(this,'.r-potential')">C — Develop</div>
+      </div>
+    </div>
+
+    <div class="form-group fu fu3">
+      <label class="form-label">Format Readiness</label>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${['Test','ODI','T20i'].map(f => `
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--navy);width:36px">${f}</span>
+          <div style="flex:1">
+            <input type="range" min="0" max="100" value="${f==='Test'?82:f==='ODI'?71:58}"
+              style="width:100%;accent-color:var(--blue)"
+              oninput="this.nextElementSibling.textContent=this.value">
+          </div>
+          <span style="font-size:11px;font-weight:900;color:var(--navy);width:28px;text-align:right">${f==='Test'?82:f==='ODI'?71:58}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="form-group fu fu3">
+      <label class="form-label">Scout Findings</label>
+      <div class="findings-box">
+        <div class="voice-indicator"><div class="voice-dot"></div>Voice note transcribed</div>
+        <div class="findings-text" contenteditable="true" style="min-height:80px;outline:none">
+          Exceptional footwork against the moving ball. Turner played with composure beyond his years — leaving well outside off, driving through cover with excellent timing. Head position at point of delivery is notably correct. One weakness: plays across the line at full length on middle stump. <strong>Top-order Test candidate.</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group fu fu4">
+      <label class="form-label">Strengths</label>
+      <input class="form-input" style="font-size:14px" value="Footwork, Leave selection, Cover drive, Temperament" type="text">
+    </div>
+
+    <div class="form-group fu fu4">
+      <label class="form-label">Areas for Development</label>
+      <input class="form-input" style="font-size:14px" value="Full-length deliveries on middle stump" type="text">
+    </div>
+
+    <div class="form-group fu fu4">
+      <label class="form-label">Attachments</label>
+      <div class="attach-row">
+        <div class="attach-box filled">📸<div class="attach-lbl">2 Photos</div></div>
+        <div class="attach-box filled">🎥<div class="attach-lbl">Clip linked</div></div>
+        <div class="attach-box" onclick="alert('Photo/video attachment — available in production build')">＋<div class="attach-lbl">Add</div></div>
+      </div>
+    </div>
+
+    <div class="form-group fu fu5">
+      <label class="form-label">Would you recommend for the Short List?</label>
+      <div class="r-grid">
+        <div class="r-btn on-g">Yes — strongly</div>
+        <div class="r-btn">Yes — monitor</div>
+        <div class="r-btn">Not yet</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sticky-submit">
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline" style="flex:1" onclick="navigate('home')">Save Draft</button>
+      <button class="btn btn-green" style="flex:2" onclick="navigate('sync')">📤 Submit Report →</button>
+    </div>
+  </div>`;
+}
+
+// ── PAGE: SYNC (F06) ──────────────────────────────────────────────────
+function renderSync() {
+  setTimeout(() => {
+    [1,2,3,4,5].forEach((n,i) => {
+      setTimeout(() => {
+        const el = document.getElementById('ss' + n);
+        if (el) el.classList.add('done');
+        if (n === 5) {
+          setTimeout(() => navigate('dashboard'), 1200);
+        }
+      }, 300 + i * 550);
+    });
+  }, 100);
+
+  return `
+  <div class="sync-page">
+    <div class="sync-ring-wrap">
+      <div class="sync-outer"></div>
+      <div class="sync-inner"></div>
+      <div class="sync-icon">📡</div>
+    </div>
+    <div>
+      <div class="sync-title">Report Submitted</div>
+      <div class="sync-sub">Syncing to ECB Performance Data Warehouse</div>
+    </div>
+    <div class="sync-steps">
+      <div class="sync-step" id="ss1"><div class="step-check">✓</div>Report saved locally with timestamp</div>
+      <div class="sync-step" id="ss2"><div class="step-check">✓</div>Network connected — upload initiated</div>
+      <div class="sync-step" id="ss3"><div class="step-check">✓</div>Written to GCP BigQuery Data Warehouse</div>
+      <div class="sync-step" id="ss4"><div class="step-check">✓</div>Central Staff notified — Oliver Turner flagged</div>
+      <div class="sync-step" id="ss5"><div class="step-check">✓</div>AI analysis pipeline triggered</div>
+    </div>
+    <div class="sync-continue">
+      <button class="btn btn-green" onclick="navigate('dashboard')">View Dashboard →</button>
+    </div>
+  </div>`;
+}
+
+// ── PAGE: DASHBOARD (F07) ─────────────────────────────────────────────
+function renderDashboard(filter) {
+  showSubnav(true);
+  const players = PLAYERS;
+  const rows = players.map(p => `
+    <tr class="${p.isNew?'hl':''}" onclick="navigate('player','${p.id}')">
+      <td>
+        <span class="p-name">${p.name}</span>
+        ${p.isNew ? '<span class="badge badge-new">New</span>' : ''}
+      </td>
+      <td><span class="p-county">${p.county}</span></td>
+      <td><span class="arch ${p.arch}">${p.archLabel}</span></td>
+      <td>${p.age}</td>
+      <td>
+        <div class="bar-wrap">
+          <div class="bar-track" style="min-width:50px">
+            <div class="bar-fill" style="width:${p.readiness}%;background:${p.readiness>=75?'var(--green)':p.readiness>=60?'var(--blue)':'var(--amber)'}"></div>
+          </div>
+          <span style="font-size:10px;font-weight:900;color:${p.readiness>=75?'var(--green)':p.readiness>=60?'var(--blue)':'var(--amber)'};min-width:24px">${p.readiness}</span>
+        </div>
+      </td>
+      <td><span class="pot pot-${p.potential.toLowerCase()}">${p.potential} — ${p.potential==='A'?'Intl':p.potential==='B'?'Pathway':'Develop'}</span></td>
+      <td style="font-weight:800;color:var(--blue)">${p.reports}</td>
+    </tr>`).join('');
+
+  return `
+  <div class="dash-page">
+    <div class="stats-grid">
+      <div class="stat-card fu">
+        <div class="stat-val">248</div>
+        <div class="stat-lbl">Players in Pipeline</div>
+        <div class="stat-delta">↑ 12 this month</div>
+      </div>
+      <div class="stat-card green-top fu fu1">
+        <div class="stat-val">34</div>
+        <div class="stat-lbl">Reports This Week</div>
+        <div class="stat-delta">● 2 new today</div>
+      </div>
+      <div class="stat-card fu fu2">
+        <div class="stat-val">18</div>
+        <div class="stat-lbl">Short List</div>
+        <div class="stat-delta">↑ 2 added</div>
+      </div>
+      <div class="stat-card fu fu3">
+        <div class="stat-val">91%</div>
+        <div class="stat-lbl">Scout Coverage</div>
+        <div class="stat-delta">On track SO-7</div>
+      </div>
+    </div>
+
+    <div class="notif-bar fu fu2" onclick="navigate('player','p1')">
+      <div class="notif-dot"></div>
+      <div class="notif-body">
+        <strong>New report — Oliver Turner (Yorkshire, 17)</strong> by J. Whitfield ·
+        High readiness · Potential A · AI summary ready
+      </div>
+      <div class="notif-cta">View →</div>
+    </div>
+
+    <div class="table-card fu fu3">
+      <div class="table-toolbar">
+        <div class="section-title" style="margin-bottom:0">Long List</div>
+        <input class="table-search" type="search" placeholder="Search players, county..." oninput="filterTable(this.value)">
+        <div class="chips" style="gap:5px">
+          <div class="chip on-blue" style="font-size:9px;padding:4px 8px;min-height:36px" onclick="toggleChip(this)">All</div>
+          <div class="chip" style="font-size:9px;padding:4px 8px;min-height:36px" onclick="toggleChip(this)">Test</div>
+          <div class="chip" style="font-size:9px;padding:4px 8px;min-height:36px" onclick="toggleChip(this)">Bat</div>
+          <div class="chip" style="font-size:9px;padding:4px 8px;min-height:36px" onclick="toggleChip(this)">Bowl</div>
+        </div>
+        <button class="btn btn-green btn-sm" onclick="alert('Export to PDF/CSV — available in Phase 2')">Export ↓</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="player-table">
+          <thead>
+            <tr>
+              <th class="sortable">Player ↕</th>
+              <th>County</th>
+              <th>Archetype</th>
+              <th class="sortable">Age ↕</th>
+              <th class="sortable">Readiness ↕</th>
+              <th>Potential</th>
+              <th class="sortable">Reports ↕</th>
+            </tr>
+          </thead>
+          <tbody id="player-tbody">${rows}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+function filterTable(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('#player-tbody tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// ── PAGE: PLAYER PROFILE (F08) ────────────────────────────────────────
+function renderPlayerProfile(pid) {
+  const p = PLAYERS.find(x => x.id === pid) || PLAYERS[0];
+  const readinessByFormat = [
+    { fmt:'Test', val:82, color:'var(--green)' },
+    { fmt:'ODI',  val:71, color:'var(--blue)' },
+    { fmt:'T20i', val:58, color:'var(--amber)' },
+    { fmt:'Future potential', val:92, color:'var(--navy)', label:'A' },
+  ];
+  const compRows = [
+    ['Test ready','82','#5BAD37','74','#1565C0'],
+    ['Technical', '88','#5BAD37','79','#1565C0'],
+    ['Consistency','71','#F59E0B','83','#5BAD37'],
+    ['Temperament','85','#5BAD37','81','#1565C0'],
+  ];
+
+  return `
+  <div>
+    <div class="page-header">
+      <div class="page-back" onclick="navigate('dashboard')">←</div>
+      <div class="page-header-info">
+        <div class="page-title">${p.name}</div>
+        <div class="page-subtitle">${p.county} · Age ${p.age}</div>
+      </div>
+      <span class="badge badge-green">Short List</span>
+    </div>
+
+    <div class="profile-header">
+      <div class="profile-avatar">${p.init}</div>
+      <div class="profile-meta-wrap">
+        <div class="profile-name">${p.name}</div>
+        <div class="profile-meta">
+          <span>🏏 ${p.county}</span>
+          <span>📍 RHB / RMF</span>
+          <span>🎂 Age ${p.age}</span>
+          <span>📅 Identified Mar 2025</span>
+        </div>
+        <div class="profile-tags">
+          <span class="ptag ptag-blue">${p.archLabel}</span>
+          <span class="ptag ptag-blue">Seam allrounder</span>
+          <span class="ptag ptag-green">Young Lions</span>
+          <span class="ptag ptag-green">Short List</span>
+          ${p.isNew ? '<span class="ptag" style="background:var(--red);color:#fff">New report</span>' : ''}
+        </div>
+        <div class="profile-actions">
+          <button class="btn btn-green btn-sm" onclick="alert('Player moved to Short List')">✓ Short List</button>
+          <button class="btn btn-navy btn-sm" onclick="alert('Compare — Phase 2 feature')">⚖ Compare</button>
+          <button class="btn btn-blue btn-sm" onclick="alert('Video — Phase 2 feature')">🎥 Video</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-grid">
+
+      <!-- Readiness scores -->
+      <div class="profile-card fu">
+        <div class="pcard-title">Readiness Scores</div>
+        <div class="gauge-row">
+          ${readinessByFormat.map(r => `
+          <div class="gauge-line">
+            <div class="gauge-lbl">${r.fmt}</div>
+            <div class="gauge-track">
+              <div class="gauge-fill" style="width:${r.val}%;background:${r.color}"></div>
+            </div>
+            <div class="gauge-num" style="color:${r.color}">${r.label || r.val}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- vs Comparison -->
+      <div class="profile-card green-top fu fu1">
+        <div class="pcard-title">vs Marcus Webb (Age 19)</div>
+        <div class="comp-header-row">
+          <div class="comp-pname">O. Turner</div>
+          <div class="comp-vs">vs</div>
+          <div class="comp-pname">M. Webb</div>
+        </div>
+        ${compRows.map(([l,v1,c1,v2,c2]) => `
+        <div class="comp-line">
+          <div class="comp-lbl">${l}</div>
+          <div class="comp-bars">
+            <div class="cbar" style="background:#f0f0f0;position:relative">
+              <div style="position:absolute;right:0;top:0;height:100%;width:${v1}%;background:${c1}"></div>
+            </div>
+            <div class="cnum">${v1}</div>
+            <div class="cdiv">|</div>
+            <div class="cnum">${v2}</div>
+            <div class="cbar" style="background:#f0f0f0;overflow:hidden">
+              <div style="width:${v2}%;height:100%;background:${c2}"></div>
+            </div>
+          </div>
+        </div>`).join('')}
+      </div>
+
+      <!-- AI Sentiment -->
+      <div class="profile-card navy-top fu fu2" style="grid-row:span 2">
+        <div class="pcard-title">AI Scout Summary</div>
+        <div class="ai-label">✦ AI · 4 Reports Analysed</div>
+        <div class="ai-quote">
+          "Across four scouting reports spanning 8 months, Turner demonstrates
+          <strong>consistent technical excellence</strong> at the crease. Scouts uniformly cite
+          exceptional leave selection and <strong>composure under pressure</strong>. His
+          footwork against seam movement is rated above peer average for his age group.
+          <br><br>
+          One recurring concern: <span style="color:var(--amber);font-weight:700">
+          susceptibility to full-length deliveries on middle stump</span>, noted by three
+          of four scouts — particularly when on the front foot. A coachable technical
+          flaw rather than a temperament issue."
+        </div>
+        <div class="theme-row">
+          <span class="theme theme-pos">Footwork ✓</span>
+          <span class="theme theme-pos">Leave selection ✓</span>
+          <span class="theme theme-pos">Temperament ✓</span>
+          <span class="theme theme-warn">Full-length ⚠</span>
+          <span class="theme theme-pos">Cover drive ✓</span>
+          <span class="theme theme-pos">Head position ✓</span>
+        </div>
+        <div class="video-card" style="margin-top:16px" onclick="alert('Video player — Phase 2 feature')">
+          <div class="play-circle">▶</div>
+          <div>
+            <div class="vm-title">YKS vs DUR · R3 O22 B4</div>
+            <div class="vm-sub">Cover drive off Thornton · Linked by J. Whitfield</div>
+          </div>
+          <span class="badge badge-green">Watch</span>
+        </div>
+      </div>
+
+      <!-- Scout reports -->
+      <div class="profile-card fu fu3" style="overflow-y:auto;max-height:320px">
+        <div class="pcard-title">Scout Reports (4)</div>
+        <div class="report-item new">
+          <div class="ri-header">
+            <div class="ri-scout">J. Whitfield <span class="badge badge-green" style="margin-left:5px">Today</span></div>
+            <span class="badge badge-green">High · A</span>
+          </div>
+          <div class="ri-text">Exceptional footwork vs moving ball. Top-order Test candidate. Voice note attached. Cover drive particularly impressive.</div>
+        </div>
+        <div class="report-item">
+          <div class="ri-header">
+            <div class="ri-scout">P. Morrison</div>
+            <div class="ri-date">Mar 2026 · High · A</div>
+          </div>
+          <div class="ri-text">Outstanding in the Lions trial match. Handled hostile short-pitch bowling with real maturity beyond his years.</div>
+        </div>
+        <div class="report-item">
+          <div class="ri-header">
+            <div class="ri-scout">D. Hughes</div>
+            <div class="ri-date">Nov 2025 · Med · B+</div>
+          </div>
+          <div class="ri-text">Good technique but inconsistent application. Plays across the line when full. Clear progression from summer viewing.</div>
+        </div>
+        <div class="report-item">
+          <div class="ri-header">
+            <div class="ri-scout">J. Whitfield</div>
+            <div class="ri-date">Jul 2025 · Med · B</div>
+          </div>
+          <div class="ri-text">First viewing. Raw talent clearly visible — timing exceptional for 16. Needs work on off-stump guard. One to watch closely.</div>
+        </div>
+      </div>
+
+      <!-- Player Timeline -->
+      <div class="profile-card fu fu4">
+        <div class="pcard-title">Player Timeline</div>
+        ${[
+          { dot:'green', label:'Mar 2025', text:'Identified by J. Whitfield (Yorkshire U17)' },
+          { dot:'blue',  label:'Jul 2025', text:'First scouting report filed — Med/B' },
+          { dot:'blue',  label:'Nov 2025', text:'Second report — Med/B+ (D. Hughes)' },
+          { dot:'blue',  label:'Mar 2026', text:'Lions trial — High/A (P. Morrison)' },
+          { dot:'green', label:'Mar 2026', text:'Moved to Long List by S. Roberts' },
+          { dot:'green', label:'Today',    text:'New report filed — High/A · AI summary ready' },
+        ].map((e,i,arr) => `
+        <div style="display:flex;gap:10px;${i<arr.length-1?'padding-bottom:12px;border-left:2px solid var(--grey-bd);margin-left:7px;padding-left:14px':'padding-left:16px'}">
+          <div style="width:14px;height:14px;border-radius:50%;background:var(--${e.dot});flex-shrink:0;${i<arr.length-1?'margin-left:-23px':'margin-left:-23px'}"></div>
+          <div style="flex:1;margin-left:6px">
+            <div style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--${e.dot});letter-spacing:.4px">${e.label}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:1px;font-weight:500">${e.text}</div>
+          </div>
+        </div>`).join('')}
+      </div>
+
+    </div>
+  </div>`;
+}
+
+// ── PAGE: COMING SOON ─────────────────────────────────────────────────
+function renderComingSoon(title, icon, desc) {
+  return `
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;padding:40px;text-align:center;gap:16px">
+    <div style="font-size:48px">${icon}</div>
+    <div style="font-size:18px;font-weight:900;color:var(--navy);text-transform:uppercase;letter-spacing:.5px">${title}</div>
+    <div style="font-size:13px;color:var(--muted);max-width:360px;line-height:1.6;font-weight:500">${desc}</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px">
+      <span class="badge badge-navy" style="font-size:10px;padding:5px 12px">Phase 2 Feature</span>
+      <span class="badge badge-green" style="font-size:10px;padding:5px 12px">In Roadmap</span>
+    </div>
+    <button class="btn btn-outline" style="margin-top:8px" onclick="navigate('dashboard')">← Back to Dashboard</button>
+  </div>`;
+}
+
+// ── CHIP TOGGLE ───────────────────────────────────────────────────────
+function toggleChip(el) {
+  const classes = ['on-blue','on-green','on-navy'];
+  const isOn = classes.some(c => el.classList.contains(c));
+  if (isOn) {
+    classes.forEach(c => el.classList.remove(c));
+  } else {
+    el.classList.add('on-blue');
+  }
+}
+function selectReadiness(el, selector) {
+  document.querySelectorAll(selector || '.r-btn').forEach(b => {
+    ['on-g','on-b','on-n'].forEach(c => b.classList.remove(c));
+  });
+  el.classList.add('on-g');
+}
+</script>
+</body>
+</html>
